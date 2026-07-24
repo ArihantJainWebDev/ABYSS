@@ -216,16 +216,17 @@ html, body {
   animation: sonarSweep 4s linear infinite;
 }
 
-/* Flashlight Spotlight Overlay */
+/* Fixed Flashlight Spotlight Overlay */
 .flashlight-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-    circle 260px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    circle 280px at var(--mouse-x, 50%) var(--mouse-y, 50%),
     transparent 0%,
-    rgba(0, 3, 10, 0.8) 60%,
+    rgba(0, 3, 10, 0.85) 55%,
     rgba(0, 2, 6, 0.98) 100%
   );
-  z-index: 10;
+  z-index: 15;
+  transition: opacity 0.5s ease;
 }
