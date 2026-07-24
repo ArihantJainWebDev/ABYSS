@@ -5,9 +5,35 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * Extracts all video frames into an array of ImageBitmaps for
- * perfectly smooth, frame-accurate scroll scrubbing.
- * Falls back to direct video.currentTime seeking if extraction fails.
+ * Calculate "object-fit: cover" draw parameters
+ * so the source image fills the destination without distortion.
+ */
+function coverFit(srcW, srcH, dstW, dstH) {
+  const srcRatio = srcW / srcH
+  const dstRatio = dstW / dstH
+  let drawW, drawH, offsetX, offsetY
+
+  if (srcRatio > dstRatio) {
+    // Source is wider → crop sides
+    drawH = dstH
+    drawW = dstH * srcRatio
+    offsetX = (dstW - drawW) / 2
+    offsetY = 0
+  } else {
+    // Source is taller → crop top/bottom
+    drawW = dstW
+    drawH = dstW / srcRatio
+    offsetX = 0
+    offsetY = (dstH - drawH) / 2
+  }
+
+  return { drawW, drawH, offsetX, offsetY }
+}
+
+/**
+ * Extract every video frame as an ImageBitmap for butter-smooth
+ * frame-accurate scroll scrubbing. Uses requestVideoFrameCallback
+ * with a seek-based fallback.
  */
 function extractFrames(videoSrc) {
   return new Promise((resolve) => {
@@ -21,73 +47,85 @@ function extractFrames(videoSrc) {
     video.addEventListener('error', () => resolve(null))
 
     video.addEventListener('loadeddata', async () => {
-      // Attempt requestVideoFrameCallback-based extraction (Chrome 83+)
-      if ('requestVideoFrameCallback' in video) {
-        const frames = []
-        const canvas = document.createElement('canvas')
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-        const ctx = canvas.getContext('2d')
+      const vw = video.videoWidth
+      const vh = video.videoHeight
+      if (!vw || !vh) { resolve(null); return }
 
-        await video.play()
+      // --- Method 1: requestVideoFrameCallback (Chrome 83+) ---
+      if ('requestVideoFrameCallback' in video) {
+        const bitmaps = []
+        const offscreen = document.createElement('canvas')
+        offscreen.width = vw
+        offscreen.height = vh
+        const octx = offscreen.getContext('2d')
+
+        try {
+          await video.play()
+        } catch { resolve(null); return }
 
         await new Promise((res) => {
-          const captureFrame = (now, metadata) => {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-            // Store as ImageData (fast to putImageData later)
-            frames.push(ctx.getImageData(0, 0, canvas.width, canvas.height))
+          let resolved = false
 
-            if (!video.ended) {
-              video.requestVideoFrameCallback(captureFrame)
-            } else {
-              res()
-            }
+          const capture = () => {
+            octx.drawImage(video, 0, 0, vw, vh)
+            createImageBitmap(offscreen).then((bmp) => {
+              bitmaps.push(bmp)
+
+              if (!video.ended && !video.paused) {
+                video.requestVideoFrameCallback(capture)
+              } else if (!resolved) {
+                resolved = true
+                res()
+              }
+            })
           }
-          video.requestVideoFrameCallback(captureFrame)
 
-          // Safety timeout – if video is very short, it may end before callback fires
+          video.requestVideoFrameCallback(capture)
           video.addEventListener('ended', () => {
-            setTimeout(res, 100)
+            setTimeout(() => { if (!resolved) { resolved = true; res() } }, 200)
           })
+          // Safety timeout for very short videos
+          setTimeout(() => { if (!resolved) { resolved = true; res() } }, 12000)
         })
 
         video.pause()
-        if (frames.length > 2) {
-          resolve({ frames, width: canvas.width, height: canvas.height })
+        video.src = '' // release memory
+
+        if (bitmaps.length > 2) {
+          resolve({ frames: bitmaps, srcWidth: vw, srcHeight: vh })
           return
         }
       }
 
-      // Fallback: seek-based extraction for browsers without requestVideoFrameCallback
+      // --- Method 2: Seek-based extraction fallback ---
       try {
-        const fps = 30
-        const totalFrames = Math.ceil(video.duration * fps)
+        const fps = 24
+        const totalFrames = Math.max(4, Math.ceil(video.duration * fps))
         const step = video.duration / totalFrames
-        const canvas = document.createElement('canvas')
-        canvas.width = video.videoWidth
-        canvas.height = video.videoHeight
-        const ctx = canvas.getContext('2d')
-        const frames = []
+        const offscreen = document.createElement('canvas')
+        offscreen.width = vw
+        offscreen.height = vh
+        const octx = offscreen.getContext('2d')
+        const bitmaps = []
 
         for (let i = 0; i < totalFrames; i++) {
-          video.currentTime = i * step
+          video.currentTime = Math.min(i * step, video.duration - 0.01)
           await new Promise((r) => {
-            const onSeeked = () => {
-              video.removeEventListener('seeked', onSeeked)
-              r()
-            }
+            const onSeeked = () => { video.removeEventListener('seeked', onSeeked); r() }
             video.addEventListener('seeked', onSeeked)
           })
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-          frames.push(ctx.getImageData(0, 0, canvas.width, canvas.height))
+          octx.drawImage(video, 0, 0, vw, vh)
+          const bmp = await createImageBitmap(offscreen)
+          bitmaps.push(bmp)
         }
 
-        if (frames.length > 0) {
-          resolve({ frames, width: canvas.width, height: canvas.height })
+        video.src = ''
+        if (bitmaps.length > 0) {
+          resolve({ frames: bitmaps, srcWidth: vw, srcHeight: vh })
           return
         }
       } catch (e) {
-        // Fall through
+        // fall through
       }
 
       resolve(null)
@@ -105,9 +143,9 @@ export default function ScrollVideoController({
   const canvasRef = useRef(null)
   const framesRef = useRef(null)
   const lastFrameRef = useRef(-1)
-  const [status, setStatus] = useState('loading') // loading | ready | fallback
+  const [status, setStatus] = useState('loading')
 
-  // --- Frame extraction on mount ---
+  // --- Extract frames on mount ---
   useEffect(() => {
     let cancelled = false
 
@@ -118,15 +156,6 @@ export default function ScrollVideoController({
 
       if (result && result.frames.length > 2) {
         framesRef.current = result
-
-        // Paint the first frame immediately
-        const canvas = canvasRef.current
-        if (canvas) {
-          canvas.width = result.width
-          canvas.height = result.height
-          const ctx = canvas.getContext('2d')
-          ctx.putImageData(result.frames[0], 0, 0)
-        }
         setStatus('ready')
       } else {
         setStatus('fallback')
@@ -137,10 +166,40 @@ export default function ScrollVideoController({
     return () => { cancelled = true }
   }, [src])
 
-  // --- ScrollTrigger to paint the correct frame ---
+  // --- Resize canvas to viewport & paint first frame ---
+  useEffect(() => {
+    if (status !== 'ready') return
+    const canvas = canvasRef.current
+    if (!canvas || !framesRef.current) return
+
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+      // Repaint current frame at new size
+      paintFrame(lastFrameRef.current >= 0 ? lastFrameRef.current : 0)
+    }
+
+    const paintFrame = (index) => {
+      const { frames, srcWidth, srcHeight } = framesRef.current
+      const idx = Math.min(frames.length - 1, Math.max(0, index))
+      const ctx = canvas.getContext('2d')
+      const { drawW, drawH, offsetX, offsetY } = coverFit(
+        srcWidth, srcHeight, canvas.width, canvas.height
+      )
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(frames[idx], offsetX, offsetY, drawW, drawH)
+    }
+
+    resize()
+    window.addEventListener('resize', resize)
+    return () => window.removeEventListener('resize', resize)
+  }, [status])
+
+  // --- ScrollTrigger → paint the correct frame ---
   useEffect(() => {
     const wrapper = wrapperRef.current
-    if (!wrapper) return
+    const canvas = canvasRef.current
+    if (!wrapper || status !== 'ready') return
 
     const st = ScrollTrigger.create({
       trigger: wrapper,
@@ -148,19 +207,21 @@ export default function ScrollVideoController({
       end: 'bottom bottom',
       scrub: true,
       onUpdate: (self) => {
-        if (status === 'ready' && framesRef.current) {
-          const { frames, width, height: h } = framesRef.current
-          const index = Math.min(
-            frames.length - 1,
-            Math.max(0, Math.round(self.progress * (frames.length - 1)))
-          )
-          if (index !== lastFrameRef.current) {
-            lastFrameRef.current = index
-            const canvas = canvasRef.current
-            if (canvas) {
-              const ctx = canvas.getContext('2d')
-              ctx.putImageData(frames[index], 0, 0)
-            }
+        if (!framesRef.current) return
+        const { frames, srcWidth, srcHeight } = framesRef.current
+        const index = Math.min(
+          frames.length - 1,
+          Math.max(0, Math.round(self.progress * (frames.length - 1)))
+        )
+        if (index !== lastFrameRef.current) {
+          lastFrameRef.current = index
+          if (canvas) {
+            const ctx = canvas.getContext('2d')
+            const { drawW, drawH, offsetX, offsetY } = coverFit(
+              srcWidth, srcHeight, canvas.width, canvas.height
+            )
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.drawImage(frames[index], offsetX, offsetY, drawW, drawH)
           }
         }
       },
@@ -171,9 +232,9 @@ export default function ScrollVideoController({
 
   return (
     <section ref={wrapperRef} style={{ position: 'relative', height, width: '100%' }}>
-      <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden' }}>
+      <div style={{ position: 'sticky', top: 0, height: '100vh', width: '100%', overflow: 'hidden', background: '#010408' }}>
 
-        {/* Canvas-based frame rendering (primary) */}
+        {/* Canvas for frame-by-frame rendering (covers full viewport) */}
         <canvas
           ref={canvasRef}
           style={{
@@ -181,18 +242,17 @@ export default function ScrollVideoController({
             inset: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
-            opacity: status === 'ready' ? 1 : 0,
-            transition: 'opacity 0.4s ease',
+            display: 'block',
           }}
         />
 
-        {/* Loading shimmer while frames decode */}
+        {/* Loading state while frames are being decoded */}
         {status === 'loading' && (
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(135deg, #010810, #021620, #010810)',
+            zIndex: 3,
+            background: '#010408',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -210,7 +270,7 @@ export default function ScrollVideoController({
           </div>
         )}
 
-        {/* Minimal tint overlay */}
+        {/* Subtle tint overlay */}
         <div
           aria-hidden
           style={{
@@ -218,11 +278,11 @@ export default function ScrollVideoController({
             inset: 0,
             background: overlayColor,
             pointerEvents: 'none',
-            zIndex: 2,
+            zIndex: 4,
           }}
         />
 
-        {/* Floating content layer */}
+        {/* Content layer */}
         <div
           style={{
             position: 'absolute',

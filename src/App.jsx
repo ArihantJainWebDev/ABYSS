@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLenis } from './engine/useLenis.js'
-import ScrollVideoController from './engine/ScrollVideoController.jsx'
+import MasterScrollEngine from './engine/MasterScrollEngine.jsx'
 import SubmarineHUD from './hud/SubmarineHUD.jsx'
 import Scene01Surface from './scenes/Scene01Surface.jsx'
 import Scene02Dive from './scenes/Scene02Dive.jsx'
@@ -20,7 +20,7 @@ export default function App() {
   const [bookingPackage, setBookingPackage] = useState(null)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
 
-  // Track mouse position for 3000m scene flashlight spotlight
+  // Track mouse position for Scene 6 flashlight spotlight
   useEffect(() => {
     const handleMouseMove = (e) => {
       setMousePos({ x: e.clientX, y: e.clientY })
@@ -29,16 +29,12 @@ export default function App() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
-  // Smooth scroll depth calculation (0m -> 4,000m)
-  useLenis(() => {
-    const scrollTop = window.scrollY
-    const maxScroll = document.body.scrollHeight - window.innerHeight
-    const progress = maxScroll > 0 ? scrollTop / maxScroll : 0
-    const calculatedDepth = Math.round(progress * 4000)
-    setDepth(calculatedDepth)
+  useLenis()
 
-    audioEngine.updateDepthFrequency(calculatedDepth)
-  })
+  const handleDepthChange = (newDepth) => {
+    setDepth(newDepth)
+    audioEngine.updateDepthFrequency(newDepth)
+  }
 
   const handleQuickJump = (targetDepth) => {
     const maxScroll = document.body.scrollHeight - window.innerHeight
@@ -53,53 +49,59 @@ export default function App() {
 
   return (
     <div className="abyss-app">
-      {/* Persistent Submarine HUD Overlay */}
+      {/* Persistent Cockpit HUD Overlay */}
       <SubmarineHUD depth={depth} onQuickJump={handleQuickJump} />
 
-      {/* Chapter 1: Surface (0m) */}
-      <ScrollVideoController src="/video/01-surface.mp4" height="200vh" overlayColor="rgba(0, 20, 30, 0.3)">
-        <Scene01Surface onBeginExpedition={() => handleQuickJump(200)} />
-      </ScrollVideoController>
+      {/* Master Scroll Engine with Single Fixed Viewport Canvas */}
+      <MasterScrollEngine onDepthChange={handleDepthChange}>
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          {/* Section 1: Surface (0m - 500m scroll space) */}
+          <div style={{ height: '170vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Scene01Surface onBeginExpedition={() => handleQuickJump(200)} />
+          </div>
 
-      {/* Chapter 2: The Dive (200m) */}
-      <ScrollVideoController src="/video/02-dive.mp4" height="150vh" overlayColor="rgba(0, 15, 25, 0.35)">
-        <Scene02Dive />
-      </ScrollVideoController>
+          {/* Section 2: The Dive (200m) */}
+          <div style={{ height: '150vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Scene02Dive />
+          </div>
 
-      {/* Chapter 3: The Living Reef (200m - 600m) */}
-      <ScrollVideoController src="/video/03-reef.mp4" height="200vh" overlayColor="rgba(2, 12, 22, 0.35)">
-        <Scene03Reef onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
-      </ScrollVideoController>
+          {/* Section 3: Living Reef (600m) */}
+          <div style={{ height: '170vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Scene03Reef onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
+          </div>
 
-      {/* Chapter 4: Bioluminescence (600m - 1500m) */}
-      <ScrollVideoController src="/video/04-bioluminescence.mp4" height="200vh" overlayColor="rgba(5, 5, 20, 0.4)">
-        <Scene04Bioluminescence onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
-      </ScrollVideoController>
+          {/* Section 4: Bioluminescence (1500m) */}
+          <div style={{ height: '170vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Scene04Bioluminescence onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
+          </div>
 
-      {/* Chapter 5: Sunken Wonders (1500m - 3000m) */}
-      <ScrollVideoController src="/video/05-ruins.mp4" height="200vh" overlayColor="rgba(2, 6, 15, 0.45)">
-        <Scene05Ruins onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
-      </ScrollVideoController>
+          {/* Section 5: Sunken Wonders (3000m) */}
+          <div style={{ height: '170vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Scene05Ruins onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
+          </div>
 
-      {/* Chapter 6: The Dark & Flashlight Spotlight (3000m) */}
-      <ScrollVideoController src="/video/06-darkness.mp4" height="200vh" overlayColor="rgba(0, 2, 8, 0.5)">
-        {/* Flashlight Spotlight Overlay mapped to mouse position */}
-        <div
-          className="flashlight-overlay"
-          style={{
-            '--mouse-x': `${mousePos.x}px`,
-            '--mouse-y': `${mousePos.y}px`,
-          }}
-        />
-        <Scene06Darkness onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
-      </ScrollVideoController>
+          {/* Section 6: The Dark & Flashlight (3500m) */}
+          <div style={{ height: '170vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+            {depth >= 2500 && (
+              <div
+                className="flashlight-overlay"
+                style={{
+                  '--mouse-x': `${mousePos.x}px`,
+                  '--mouse-y': `${mousePos.y}px`,
+                }}
+              />
+            )}
+            <Scene06Darkness onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
+          </div>
 
-      {/* Chapter 7: The Abyss Terminal (4000m Hadal Zone) */}
-      <ScrollVideoController src="/video/07-abyss.mp4" height="250vh" overlayColor="rgba(0, 3, 10, 0.35)">
-        <Scene07AbyssTerminal onOpenBooking={handleOpenBooking} />
-      </ScrollVideoController>
+          {/* Section 7: The Abyss Terminal (4000m Hadal Zone) */}
+          <div style={{ height: '220vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Scene07AbyssTerminal onOpenBooking={handleOpenBooking} />
+          </div>
+        </div>
+      </MasterScrollEngine>
 
-      {/* Interactive Telemetry Modal */}
+      {/* Discovery Modal */}
       <MarineModal item={selectedDiscovery} onClose={() => setSelectedDiscovery(null)} />
 
       {/* Mission Control Booking Modal */}
