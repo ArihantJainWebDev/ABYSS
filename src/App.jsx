@@ -68,50 +68,50 @@ export default function App() {
       <MasterScrollEngine onDepthChange={handleDepthChange}>
         <div style={{ position: 'relative', zIndex: 10 }}>
           {/* Section 1: Surface (0m) */}
-          <div style={{ height: '180vh', position: 'relative' }}>
+          <div style={{ height: '200vh', position: 'relative' }}>
             <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scene01Surface onBeginExpedition={() => handleQuickJump(200)} />
             </div>
           </div>
 
           {/* Section 2: The Dive (200m) */}
-          <div style={{ height: '160vh', position: 'relative' }}>
+          <div style={{ height: '200vh', position: 'relative' }}>
             <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scene02Dive />
             </div>
           </div>
 
           {/* Section 3: Living Reef (600m) */}
-          <div style={{ height: '180vh', position: 'relative' }}>
+          <div style={{ height: '200vh', position: 'relative' }}>
             <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scene03Reef onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
             </div>
           </div>
 
           {/* Section 4: Bioluminescence (1500m) */}
-          <div style={{ height: '180vh', position: 'relative' }}>
+          <div style={{ height: '200vh', position: 'relative' }}>
             <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scene04Bioluminescence onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
             </div>
           </div>
 
           {/* Section 5: Sunken Wonders (3000m) */}
-          <div style={{ height: '180vh', position: 'relative' }}>
+          <div style={{ height: '200vh', position: 'relative' }}>
             <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scene05Ruins onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
             </div>
           </div>
 
           {/* Section 6: The Dark & Flashlight (3500m) */}
-          <div style={{ height: '180vh', position: 'relative' }}>
+          <div style={{ height: '200vh', position: 'relative' }}>
             <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scene06Darkness onSelectDiscovery={(item) => setSelectedDiscovery(item)} />
             </div>
           </div>
 
           {/* Section 7: The Abyss Terminal (4000m Hadal Zone) */}
-          <div style={{ height: '240vh', position: 'relative' }}>
-            <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflowY: 'auto' }}>
+          <div style={{ height: '200vh', position: 'relative' }}>
+            <div style={{ position: 'sticky', top: 0, height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scene07AbyssTerminal onOpenBooking={handleOpenBooking} />
             </div>
           </div>

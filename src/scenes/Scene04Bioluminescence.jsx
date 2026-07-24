@@ -1,93 +1,138 @@
 import React from 'react'
-import { Zap, Eye, Moon, Sparkles } from 'lucide-react'
+import { Zap, Eye, Moon } from 'lucide-react'
 import { audioEngine } from '../engine/AudioEngine'
 
 export default function Scene04Bioluminescence({ onSelectDiscovery }) {
-  const biolumDiscoveries = [
+  const discoveries = [
     {
-      title: 'Bioluminescent Pyrosome Night Dive',
+      title: 'Pyrosoma atlanticum',
       scientificName: 'Pyrosoma atlanticum',
       depth: '600 METERS',
-      description: 'Witness giant cylindrical colonies of bioluminescent tunicates producing pulses of brilliant cyan light in total darkness.',
+      description: 'Bioluminescent tunicate colony producing 470nm cyan light pulses.',
       biolum: 'HIGH (470nm Cyan)',
       pressure: '61.0 BAR',
-      status: 'ACTIVE BIOLOGICAL DISCOVERY',
+      status: 'LIVE DETECTION',
     },
     {
-      title: 'Silent Mag-Drive Thruster Array',
-      scientificName: 'Submarine Engineering Spec M4',
+      title: 'Mag-Drive Thruster Array',
+      scientificName: 'Engineering Spec M4',
       depth: '600 METERS',
-      description: 'Hydro-magnetic propulsion operating under 5 decibels, enabling close encounters with sensitive deep sea species.',
-      biolum: 'ACOUSTICALLY SILENT',
+      description: 'Hydro-magnetic propulsion under 5 decibels.',
+      biolum: 'SILENT',
       pressure: '61.0 BAR',
-      status: 'VERIFIED HARDWARE',
+      status: 'VERIFIED',
     },
   ]
 
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '0 24px',
-        pointerEvents: 'auto',
+        height: '100%',
+        pointerEvents: 'none',
       }}
     >
-      <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <Moon size={16} color="#7000FF" />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#7000FF', letterSpacing: '0.2em' }}>
-            600 METERS • MESOPELAGIC ZONE
-          </span>
-        </div>
-        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(2.2rem, 4.5vw, 3.8rem)', fontWeight: 800, color: '#FFF' }}>
-          Where Light Is Born
-        </h2>
+      {/* Top-Right: Zone Label */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 'clamp(60px, 10vh, 120px)',
+          right: 'clamp(16px, 4vw, 60px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
+        <div style={{ width: 'clamp(20px, 5vw, 80px)', height: '1px', background: 'var(--color-cyan)', opacity: 0.3 }} />
+        <span className="text-mono text-cyan" style={{ fontSize: 'clamp(0.55rem, 1vw, 0.65rem)', opacity: 0.7 }}>
+          600M • MESOPELAGIC
+        </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-        {biolumDiscoveries.map((item, idx) => (
+      {/* Bottom-Left: Title */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 'clamp(40px, 8vh, 120px)',
+          left: 'clamp(16px, 4vw, 60px)',
+          maxWidth: 'min(520px, calc(100vw - 32px))',
+        }}
+      >
+        <div className="text-mono text-cyan" style={{ fontSize: 'clamp(0.6rem, 1.1vw, 0.7rem)', marginBottom: '6px', opacity: 0.6 }}>
+          <Moon size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />
+          BIO_SCAN // ACTIVE
+        </div>
+
+        <h2
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 800,
+            fontSize: 'clamp(1.8rem, 5vw, 3.8rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.03em',
+            color: '#FFF',
+            marginBottom: '16px',
+          }}
+        >
+          Where light<br />
+          <span className="text-cyan">is born.</span>
+        </h2>
+
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(0.75rem, 1.4vw, 0.95rem)',
+            color: 'rgba(255, 255, 255, 0.65)',
+            lineHeight: 1.5,
+            maxWidth: 'min(380px, calc(100vw - 48px))',
+          }}
+        >
+          Colonies of bioluminescent organisms
+          generate pulsing waves of cyan light
+          in total darkness — visible only from
+          a silent approach.
+        </p>
+      </div>
+
+      {/* Right side: Clickable spec labels (Desktop only) */}
+      <div
+        className="hide-on-mobile"
+        style={{
+          position: 'absolute',
+          right: 'clamp(24px, 5vw, 60px)',
+          bottom: 'clamp(60px, 10vh, 120px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '12px',
+          pointerEvents: 'auto',
+        }}
+      >
+        {discoveries.map((item, i) => (
           <div
-            key={idx}
-            className="glass-panel"
-            style={{
-              padding: '24px',
-              borderRadius: '12px',
-              border: '1px solid rgba(112, 0, 255, 0.3)',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-            }}
+            key={i}
             onClick={() => {
               audioEngine.playClick()
               if (onSelectDiscovery) onSelectDiscovery(item)
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#00F0FF'
-              e.currentTarget.style.transform = 'translateY(-4px)'
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              cursor: 'pointer',
+              padding: '6px 0',
+              opacity: 0.7,
+              transition: 'opacity 0.3s ease',
             }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(112, 0, 255, 0.3)'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.7')}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#7000FF' }}>
-                SPECTRUM 0{idx + 1}
-              </span>
-              <Zap size={14} color="#00F0FF" />
-            </div>
-
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '6px', color: '#FFF' }}>
+            <span className="text-mono" style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textAlign: 'right', maxWidth: '180px' }}>
               {item.title}
-            </h3>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5, marginBottom: '14px' }}>
-              {item.description}
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#00F0FF' }}>
-              <Eye size={12} /> INSPECT SPECTRUM DATA
-            </div>
+            </span>
+            <div style={{ width: 'clamp(20px, 4vw, 50px)', height: '1px', background: 'var(--color-cyan)', opacity: 0.4 }} />
+            <Zap size={10} className="text-cyan" style={{ opacity: 0.5 }} />
           </div>
         ))}
       </div>

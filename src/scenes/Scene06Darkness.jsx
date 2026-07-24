@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Flashlight, Sparkles } from 'lucide-react'
+import { Flashlight, Crosshair } from 'lucide-react'
 import { audioEngine } from '../engine/AudioEngine'
 
 export default function Scene06Darkness({ onSelectDiscovery }) {
@@ -8,134 +8,173 @@ export default function Scene06Darkness({ onSelectDiscovery }) {
   const abyssHotspots = [
     {
       id: 'anglerfish',
-      x: '30%',
-      y: '45%',
-      title: 'Melanocetus Johnsonii (Humpback Anglerfish)',
-      scientificName: 'Deep Sea Predator Specimen',
+      x: '25%',
+      y: '40%',
+      title: 'Melanocetus johnsonii',
+      scientificName: 'Deep Sea Predator',
       depth: '3000 METERS',
-      description: 'Equipped with a modified dorsal fin spine bearing a glowing esca (lure) containing bioluminescent symbiotic bacteria.',
-      biolum: 'EMITTED FROM ESCA LURE',
+      description: 'Modified dorsal fin spine bearing a glowing esca lure with bioluminescent symbiotic bacteria.',
+      biolum: 'ESCA LURE',
       pressure: '301.0 BAR',
-      status: 'LIVE SPECIES DETECTED',
+      status: 'LIVE SPECIES',
     },
     {
       id: 'vent',
-      x: '70%',
-      y: '60%',
-      title: 'Hydrothermal Black Smoker Vent',
-      scientificName: 'Geothermal Mineral Chimney',
+      x: '65%',
+      y: '55%',
+      title: 'Black Smoker Vent',
+      scientificName: 'Geothermal Chimney',
       depth: '3000 METERS',
-      description: 'Superheated fluids at 380°C rich in iron sulfide spew into near-freezing ocean water, supporting chemosynthetic ecosystems.',
+      description: 'Superheated fluids at 380°C rich in iron sulfide supporting chemosynthetic ecosystems.',
       biolum: 'THERMAL GLOW',
       pressure: '301.0 BAR',
-      status: 'GEOTHERMAL ANOMALY',
+      status: 'GEOTHERMAL',
     },
     {
       id: 'squid',
-      x: '50%',
-      y: '35%',
-      title: 'Architeuthis Dux (Giant Abyssal Squid)',
-      scientificName: 'Colossal Cephalopod Specimen',
+      x: '45%',
+      y: '30%',
+      title: 'Architeuthis dux',
+      scientificName: 'Colossal Cephalopod',
       depth: '3000 METERS',
-      description: 'Elusive predator featuring eyes the size of dinner plates designed to capture faint bioluminescent flashes in pitch black water.',
-      biolum: 'FAINT REFLECTIVE GLOW',
+      description: 'Dinner-plate-sized eyes capture faint bioluminescent flashes in pitch-black water.',
+      biolum: 'REFLECTIVE',
       pressure: '301.0 BAR',
-      status: 'SHADOW DETECTED ON SONAR',
+      status: 'SONAR SHADOW',
     },
   ]
 
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
-        maxWidth: '900px',
-        margin: '0 auto',
-        padding: '0 24px',
-        pointerEvents: 'auto',
-        textAlign: 'center',
+        height: '100%',
+        pointerEvents: 'none',
       }}
     >
-      <div className="glass-panel" style={{ padding: '24px 36px', borderRadius: '14px', maxWidth: '640px', margin: '0 auto 30px auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
-          <Flashlight size={16} color="#00F0FF" />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#00F0FF', letterSpacing: '0.2em' }}>
-            3000 METERS • ABYSSOPELAGIC ZONE
-          </span>
+      {/* Top-Right: Zone Label */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 'clamp(60px, 10vh, 120px)',
+          right: 'clamp(16px, 4vw, 60px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
+        <div style={{ width: 'clamp(20px, 5vw, 80px)', height: '1px', background: 'var(--color-cyan)', opacity: 0.3 }} />
+        <span className="text-mono text-cyan" style={{ fontSize: 'clamp(0.55rem, 1vw, 0.65rem)', opacity: 0.7 }}>
+          3000M • ABYSSOPELAGIC
+        </span>
+      </div>
+
+      {/* Bottom-Left: Title */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 'clamp(40px, 8vh, 120px)',
+          left: 'clamp(16px, 4vw, 60px)',
+          maxWidth: 'min(520px, calc(100vw - 32px))',
+        }}
+      >
+        <div className="text-mono text-cyan" style={{ fontSize: 'clamp(0.6rem, 1.1vw, 0.7rem)', marginBottom: '6px', opacity: 0.6 }}>
+          <Flashlight size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />
+          SPOTLIGHT_PROTOCOL // ACTIVE
         </div>
 
-        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(2rem, 3.8vw, 3.2rem)', fontWeight: 800, color: '#FFF', marginBottom: '8px' }}>
-          The Dark Descends
+        <h2
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 800,
+            fontSize: 'clamp(1.8rem, 5vw, 3.8rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.03em',
+            color: '#FFF',
+            marginBottom: '16px',
+          }}
+        >
+          The dark<br />
+          <span className="text-cyan">descends.</span>
         </h2>
 
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>
-          Zero natural light exists. <strong>Move your cursor to sweep the spotlight and reveal hidden species.</strong>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(0.75rem, 1.4vw, 0.95rem)',
+            color: 'rgba(255, 255, 255, 0.65)',
+            lineHeight: 1.5,
+            maxWidth: 'min(380px, calc(100vw - 48px))',
+          }}
+        >
+          Zero natural light exists at this depth.
+          Sweep the viewport to reveal hidden
+          biomass targets on sonar.
         </p>
       </div>
 
-      {/* Interactive Hotspots */}
-      <div style={{ position: 'relative', width: '100%', height: '240px', margin: '0 auto' }}>
-        {abyssHotspots.map((spot) => (
+      {/* Interactive Hotspots scattered across viewport */}
+      {abyssHotspots.map((spot) => (
+        <div
+          key={spot.id}
+          style={{
+            position: 'absolute',
+            top: spot.y,
+            left: spot.x,
+            transform: 'translate(-50%, -50%)',
+            cursor: 'pointer',
+            zIndex: 30,
+            pointerEvents: 'auto',
+          }}
+          onClick={() => {
+            audioEngine.playSonarPing()
+            if (onSelectDiscovery) onSelectDiscovery(spot)
+          }}
+          onMouseEnter={() => {
+            setActiveHotspot(spot.id)
+            audioEngine.playClick()
+          }}
+          onMouseLeave={() => setActiveHotspot(null)}
+        >
           <div
-            key={spot.id}
-            onClick={() => {
-              audioEngine.playSonarPing()
-              if (onSelectDiscovery) onSelectDiscovery(spot)
-            }}
-            onMouseEnter={() => {
-              setActiveHotspot(spot.id)
-              audioEngine.playClick()
-            }}
-            onMouseLeave={() => setActiveHotspot(null)}
             style={{
-              position: 'absolute',
-              top: spot.y,
-              left: spot.x,
-              transform: 'translate(-50%, -50%)',
-              cursor: 'pointer',
-              zIndex: 30,
+              width: 'clamp(20px, 3.5vw, 30px)',
+              height: 'clamp(20px, 3.5vw, 30px)',
+              borderRadius: '50%',
+              background: 'rgba(0, 229, 255, 0.1)',
+              border: '1px solid var(--color-cyan)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 12px var(--color-cyan-glow)',
+              animation: 'pulseGlow 2s infinite',
             }}
           >
+            <Crosshair size={10} className="text-cyan" />
+          </div>
+
+          {activeHotspot === spot.id && (
             <div
-              className="animate-pulse-glow"
+              className="text-mono text-cyan"
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                background: 'rgba(0, 240, 255, 0.2)',
-                border: '1px solid #00F0FF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 16px #00F0FF',
+                position: 'absolute',
+                top: '110%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                whiteSpace: 'nowrap',
+                padding: '4px 8px',
+                fontSize: '0.55rem',
+                background: 'rgba(3, 8, 14, 0.9)',
+                border: '1px solid var(--color-cyan)',
+                pointerEvents: 'none',
               }}
             >
-              <Sparkles size={16} color="#FFF" />
+              {spot.title}
             </div>
-
-            {activeHotspot === spot.id && (
-              <div
-                className="glass-panel"
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  marginTop: '10px',
-                  whiteSpace: 'nowrap',
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.72rem',
-                  color: '#00F0FF',
-                  pointerEvents: 'none',
-                }}
-              >
-                SCAN: {spot.title}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+          )}
+        </div>
+      ))}
     </div>
   )
 }

@@ -1,75 +1,119 @@
 import React from 'react'
-import { ArrowDown, Compass } from 'lucide-react'
-import { audioEngine } from '../engine/AudioEngine'
+import { Terminal } from 'lucide-react'
 
-export default function Scene01Surface({ onBeginExpedition }) {
+export default function Scene01Surface() {
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
-        maxWidth: '900px',
-        margin: '0 auto',
-        textAlign: 'center',
-        padding: '0 24px',
-        pointerEvents: 'auto',
+        height: '100%',
+        pointerEvents: 'none',
       }}
     >
+      {/* Top-Right: System Init Tag */}
       <div
-        className="glass-panel"
         style={{
-          display: 'inline-flex',
+          position: 'absolute',
+          top: 'clamp(60px, 10vh, 120px)',
+          right: 'clamp(16px, 4vw, 60px)',
+          display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '6px 18px',
-          borderRadius: '30px',
-          marginBottom: '20px',
+          pointerEvents: 'auto',
         }}
       >
-        <Compass size={14} color="#00F0FF" />
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#00F0FF' }}>
-          DEEP SEA EXPLORATION CO.
+        <span className="text-mono text-cyan" style={{ fontSize: 'clamp(0.55rem, 1vw, 0.75rem)', opacity: 0.7 }}>
+          SYS.INIT
         </span>
+        <div style={{ width: 'clamp(20px, 5vw, 120px)', height: '1px', background: 'var(--color-cyan)', opacity: 0.3 }} />
+        <Terminal size={12} className="text-cyan" style={{ opacity: 0.5 }} />
       </div>
 
-      <h1
-        className="text-glow-cyan"
+      {/* Bottom-Left: Main Title Block */}
+      <div
         style={{
-          fontFamily: 'var(--font-heading)',
-          fontSize: 'clamp(2.8rem, 6vw, 5.5rem)',
-          fontWeight: 800,
-          lineHeight: 1.05,
-          letterSpacing: '-0.02em',
-          marginBottom: '16px',
-          color: '#FFF',
+          position: 'absolute',
+          bottom: 'clamp(140px, 20vh, 240px)', /* Pushed much higher to avoid collision with labels */
+          left: 'clamp(16px, 4vw, 60px)',
+          maxWidth: 'min(520px, calc(100vw - 32px))',
+          pointerEvents: 'auto',
         }}
       >
-        Explore The Last Frontier
-      </h1>
+        <h1
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 800,
+            fontSize: 'clamp(1.8rem, 5.5vw, 4.5rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.03em',
+            color: '#FFF',
+            marginBottom: '12px',
+          }}
+        >
+          The complete<br />
+          <span className="text-cyan">deep sea</span> expedition.
+        </h1>
 
-      <p
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(0.75rem, 1.4vw, 1rem)',
+            color: 'rgba(255, 255, 255, 0.65)',
+            lineHeight: 1.5,
+            maxWidth: 'min(400px, calc(100vw - 48px))',
+          }}
+        >
+          Descend into the Hadal Zone inside
+          titanium-hulled submersibles with a
+          single mission directive.
+        </p>
+      </div>
+
+      {/* Right-side floating labels with dashed lines (Desktop only) */}
+      <div
+        className="hide-on-mobile"
         style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 'clamp(1rem, 1.8vw, 1.25rem)',
-          color: 'rgba(255, 255, 255, 0.85)',
-          maxWidth: '600px',
-          margin: '0 auto 32px auto',
-          lineHeight: 1.6,
-          fontWeight: 300,
+          position: 'absolute',
+          right: 'clamp(24px, 5vw, 60px)',
+          bottom: 'clamp(100px, 18vh, 200px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '6px',
         }}
       >
-        Descend thousands of meters into unexplored ocean trenches inside titanium-hulled luxury submersibles.
-      </p>
+        {['titanium hull', 'mag-drive', 'acrylic dome', 'life support', 'sonar array', 'ballast'].map((label, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="text-mono" style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em' }}>
+              {label}
+            </span>
+            <div style={{ width: 'clamp(30px, 6vw, 80px)', height: '1px', background: 'rgba(255,255,255,0.15)' }} />
+          </div>
+        ))}
+      </div>
 
-      <button
-        onClick={() => {
-          audioEngine.playSonarPing()
-          if (onBeginExpedition) onBeginExpedition()
+      {/* Bottom-Left: Floating telemetry labels (Desktop only) */}
+      <div
+        className="hide-on-mobile"
+        style={{
+          position: 'absolute',
+          left: 'clamp(24px, 5vw, 60px)',
+          bottom: 'clamp(24px, 4vh, 45px)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
         }}
-        className="btn-primary"
       >
-        <span>BEGIN EXPEDITION</span>
-        <ArrowDown size={16} />
-      </button>
+        {['depth', 'pressure', 'telemetry', 'scroll', 'mission'].map((label, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="text-mono" style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)' }}>
+              {label}
+            </span>
+            <div style={{ width: 'clamp(20px, 5vw, 60px)', height: '1px', background: 'rgba(255,255,255,0.12)' }} />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

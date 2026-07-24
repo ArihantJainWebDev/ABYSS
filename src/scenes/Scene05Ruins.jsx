@@ -1,93 +1,137 @@
 import React from 'react'
-import { Anchor, Eye, Sparkles } from 'lucide-react'
+import { Anchor, Eye } from 'lucide-react'
 import { audioEngine } from '../engine/AudioEngine'
 
 export default function Scene05Ruins({ onSelectDiscovery }) {
-  const relicDiscoveries = [
+  const discoveries = [
     {
-      title: 'Sunken Galleon Archeology Charter',
-      scientificName: '17th-Century Treasure Shipwreck Site',
+      title: 'Sunken Galleon Charter',
+      scientificName: '17th-Century Shipwreck Site',
       depth: '1500 METERS',
-      description: 'Navigate ancient wooden hulls preserved by cold abyssal waters. Includes 3D laser photogrammetry mapping.',
+      description: '3D laser photogrammetry mapping of preserved hulls.',
       biolum: 'N/A',
       pressure: '151.0 BAR',
-      status: 'PROTECTED ARCHAEOLOGY SITE',
+      status: 'PROTECTED SITE',
     },
     {
-      title: 'Scientific Research & Payload Missions',
-      scientificName: 'Suboceanic Exploration Partnership',
+      title: 'Scientific Payload Mission',
+      scientificName: 'Suboceanic Partnership',
       depth: '1500 METERS',
-      description: 'Partner with oceanographic institutions to collect deep-water eDNA samples and deploy deep seafloor sensors.',
+      description: 'eDNA sampling and deep seafloor sensor deployment.',
       biolum: 'VARIES',
       pressure: '151.0 BAR',
-      status: 'OPEN FOR SCIENTIFIC CHARTER',
+      status: 'OPEN CHARTER',
     },
   ]
 
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
-        maxWidth: '1000px',
-        margin: '0 auto',
-        padding: '0 24px',
-        pointerEvents: 'auto',
+        height: '100%',
+        pointerEvents: 'none',
       }}
     >
-      <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <Anchor size={16} color="#FFD166" />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#FFD166', letterSpacing: '0.2em' }}>
-            1500 METERS • BATHYPELAGIC ZONE
-          </span>
-        </div>
-        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(2.2rem, 4.5vw, 3.8rem)', fontWeight: 800, color: '#FFF' }}>
-          What The Sea Keeps
-        </h2>
+      {/* Top-Right: Zone Label */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 'clamp(60px, 10vh, 120px)',
+          right: 'clamp(16px, 4vw, 60px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
+        <div style={{ width: 'clamp(20px, 5vw, 80px)', height: '1px', background: 'var(--color-gold)', opacity: 0.3 }} />
+        <span className="text-mono text-gold" style={{ fontSize: 'clamp(0.55rem, 1vw, 0.65rem)', opacity: 0.7 }}>
+          1500M • BATHYPELAGIC
+        </span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
-        {relicDiscoveries.map((item, idx) => (
+      {/* Bottom-Left: Title */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 'clamp(40px, 8vh, 120px)',
+          left: 'clamp(16px, 4vw, 60px)',
+          maxWidth: 'min(520px, calc(100vw - 32px))',
+        }}
+      >
+        <div className="text-mono text-gold" style={{ fontSize: 'clamp(0.6rem, 1.1vw, 0.7rem)', marginBottom: '6px', opacity: 0.6 }}>
+          <Anchor size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />
+          MISSION_LOG // ARCHAEOLOGY
+        </div>
+
+        <h2
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 800,
+            fontSize: 'clamp(1.8rem, 5vw, 3.8rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.03em',
+            color: '#FFF',
+            marginBottom: '16px',
+          }}
+        >
+          What the sea<br />
+          <span className="text-gold">keeps.</span>
+        </h2>
+
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(0.75rem, 1.4vw, 0.95rem)',
+            color: 'rgba(255, 255, 255, 0.65)',
+            lineHeight: 1.5,
+            maxWidth: 'min(380px, calc(100vw - 48px))',
+          }}
+        >
+          Navigate ancient wooden hulls preserved
+          by cold abyssal waters. Deploy eDNA
+          samplers and deep seafloor sensor arrays.
+        </p>
+      </div>
+
+      {/* Right side: Clickable labels (Desktop only) */}
+      <div
+        className="hide-on-mobile"
+        style={{
+          position: 'absolute',
+          right: 'clamp(24px, 5vw, 60px)',
+          bottom: 'clamp(60px, 10vh, 120px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: '12px',
+          pointerEvents: 'auto',
+        }}
+      >
+        {discoveries.map((item, i) => (
           <div
-            key={idx}
-            className="glass-panel"
-            style={{
-              padding: '24px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 209, 102, 0.3)',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-            }}
+            key={i}
             onClick={() => {
               audioEngine.playPressureCreak()
               if (onSelectDiscovery) onSelectDiscovery(item)
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#FFD166'
-              e.currentTarget.style.transform = 'translateY(-4px)'
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              cursor: 'pointer',
+              padding: '6px 0',
+              opacity: 0.7,
+              transition: 'opacity 0.3s ease',
             }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(255, 209, 102, 0.3)'
-              e.currentTarget.style.transform = 'translateY(0)'
-            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.7')}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: '#FFD166' }}>
-                ARCHAEOLOGY 0{idx + 1}
-              </span>
-              <Sparkles size={14} color="#FFD166" />
-            </div>
-
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '6px', color: '#FFF' }}>
+            <span className="text-mono" style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textAlign: 'right', maxWidth: '180px' }}>
               {item.title}
-            </h3>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.5, marginBottom: '14px' }}>
-              {item.description}
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#FFD166' }}>
-              <Eye size={12} /> INSPECT ARCHAEOLOGY TELEMETRY
-            </div>
+            </span>
+            <div style={{ width: 'clamp(20px, 4vw, 50px)', height: '1px', background: 'var(--color-gold)', opacity: 0.4 }} />
+            <Eye size={10} className="text-gold" style={{ opacity: 0.5 }} />
           </div>
         ))}
       </div>

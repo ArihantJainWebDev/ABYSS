@@ -1,20 +1,13 @@
 import React, { useState } from 'react'
+import { Anchor, ChevronDown, Activity, Gauge, Wind } from 'lucide-react'
 import { audioEngine } from '../engine/AudioEngine'
-import { Volume2, VolumeX, Anchor, ChevronDown, Activity, Gauge, Compass as CompassIcon, Wind } from 'lucide-react'
 
 export default function SubmarineHUD({ depth = 0, onQuickJump }) {
-  const [isAudioActive, setIsAudioActive] = useState(false)
   const [showNavMenu, setShowNavMenu] = useState(false)
 
   const bar = (1 + depth / 10).toFixed(1)
   const o2 = (98.4 - (depth / 4000) * 4.2).toFixed(1)
   const feet = Math.round(depth * 3.28084)
-
-  const handleAudioToggle = () => {
-    const active = audioEngine.toggleSound()
-    setIsAudioActive(active)
-    if (active) audioEngine.playClick()
-  }
 
   const navStops = [
     { label: 'Surface (0m)', depth: 0 },
@@ -29,9 +22,9 @@ export default function SubmarineHUD({ depth = 0, onQuickJump }) {
     <>
       {/* Submarine Viewport & Scanlines Overlay */}
       <div className="viewport-cockpit-frame" />
-      <div className="viewport-glass-reflection" />
       <div className="scanline-overlay" />
 
+      {/* Schematic Corner Reticles */}
       <div className="cockpit-hud-corner tl" />
       <div className="cockpit-hud-corner tr" />
       <div className="cockpit-hud-corner bl" />
@@ -41,21 +34,22 @@ export default function SubmarineHUD({ depth = 0, onQuickJump }) {
       <header
         style={{
           position: 'fixed',
-          top: '20px',
-          left: '20px',
-          right: '20px',
+          top: '3vmin',
+          left: '3vmin',
+          right: '3vmin',
           zIndex: 50,
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           pointerEvents: 'none',
+          gap: '12px',
         }}
       >
         {/* Left: Brand & Navigation */}
-        <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="glass-panel" style={{ padding: '8px 16px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Anchor size={16} color="#00F0FF" />
-            <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.15em', color: '#FFF' }}>
+        <div style={{ pointerEvents: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="glass-panel" style={{ padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+            <Anchor size={14} className="text-cyan" />
+            <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '0.85rem', letterSpacing: '0.2em' }}>
               ABYSS
             </span>
           </div>
@@ -66,21 +60,20 @@ export default function SubmarineHUD({ depth = 0, onQuickJump }) {
                 setShowNavMenu(!showNavMenu)
                 audioEngine.playClick()
               }}
-              className="glass-panel"
+              className="glass-panel text-mono"
               style={{
-                padding: '8px 16px',
-                borderRadius: '30px',
-                color: '#FFF',
+                padding: '6px 12px',
+                color: 'var(--color-cyan)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
                 cursor: 'pointer',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.72rem',
+                fontSize: '0.7rem',
                 border: '1px solid var(--hud-border)',
+                background: 'transparent',
               }}
             >
-              SECTORS <ChevronDown size={14} color="#00F0FF" />
+              SECTORS <ChevronDown size={12} />
             </button>
 
             {showNavMenu && (
@@ -88,13 +81,12 @@ export default function SubmarineHUD({ depth = 0, onQuickJump }) {
                 className="glass-panel"
                 style={{
                   position: 'absolute',
-                  top: '120%',
+                  top: '100%',
                   left: 0,
-                  width: '200px',
-                  borderRadius: '12px',
-                  padding: '8px 0',
+                  width: '180px',
+                  padding: '4px 0',
+                  marginTop: '4px',
                   zIndex: 60,
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.8)',
                 }}
               >
                 {navStops.map((stop) => (
@@ -105,21 +97,21 @@ export default function SubmarineHUD({ depth = 0, onQuickJump }) {
                       setShowNavMenu(false)
                       audioEngine.playSonarPing()
                     }}
+                    className="text-mono"
                     style={{
                       width: '100%',
-                      padding: '10px 16px',
+                      padding: '8px 12px',
                       background: 'transparent',
                       border: 'none',
                       color: '#FFF',
                       textAlign: 'left',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       cursor: 'pointer',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,240,255,0.15)')}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-cyan-dim)')}
                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                   >
                     <span>{stop.label}</span>
@@ -132,83 +124,62 @@ export default function SubmarineHUD({ depth = 0, onQuickJump }) {
 
         {/* Center: Unified Ultra-Sleek Telemetry Pill */}
         <div
-          className="glass-panel"
+          className="glass-panel text-mono"
           style={{
             pointerEvents: 'auto',
-            padding: '8px 24px',
-            borderRadius: '30px',
+            padding: '8px 16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '20px',
-            fontFamily: 'var(--font-mono)',
+            gap: '12px',
             fontSize: '0.75rem',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            maxWidth: '50vw',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-            <Activity size={13} color="#00F0FF" style={{ marginRight: '4px' }} />
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 800, color: '#00F0FF' }}>
+            <Activity size={12} className="text-cyan hide-on-mobile" style={{ marginRight: '4px' }} />
+            <span className="text-cyan" style={{ fontSize: '1rem', fontWeight: 600 }}>
               {depth.toLocaleString()}
             </span>
-            <span style={{ color: '#00F0FF', fontSize: '0.8rem' }}>M</span>
-            <span style={{ opacity: 0.5, fontSize: '0.68rem', marginLeft: '4px' }}>({feet.toLocaleString()} FT)</span>
+            <span className="text-cyan" style={{ fontSize: '0.7rem' }}>M</span>
+            <span className="text-muted hide-on-mobile" style={{ fontSize: '0.65rem', marginLeft: '4px' }}>
+              ({feet.toLocaleString()} FT)
+            </span>
           </div>
 
-          <div style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.15)' }} />
+          <div className="hide-on-mobile" style={{ width: '1px', height: '12px', background: 'var(--color-grid)' }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Gauge size={13} color={depth > 1000 ? '#FFD166' : '#FFF'} />
-            <span style={{ fontWeight: 700, color: depth > 1000 ? '#FFD166' : '#FFF' }}>{bar} BAR</span>
+          <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Gauge size={12} color={depth > 1000 ? 'var(--color-gold)' : 'var(--text-muted)'} />
+            <span style={{ color: depth > 1000 ? 'var(--color-gold)' : 'var(--text-muted)' }}>{bar} BAR</span>
           </div>
 
-          <div style={{ width: '1px', height: '14px', background: 'rgba(255,255,255,0.15)' }} />
+          <div className="hide-on-mobile" style={{ width: '1px', height: '12px', background: 'var(--color-grid)' }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Wind size={13} color="#00F0FF" />
-            <span style={{ opacity: 0.8 }}>O2:</span>
-            <span style={{ fontWeight: 700, color: '#FFF' }}>{o2}%</span>
+          <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Wind size={12} className="text-cyan" />
+            <span className="text-muted">O2:</span>
+            <span>{o2}%</span>
           </div>
         </div>
 
-        {/* Right: Sound Toggle & Sonar */}
-        <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Sonar Indicator Dot */}
+        {/* Right: Sonar Indicator */}
+        <div style={{ pointerEvents: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
           <div
-            className="glass-panel"
+            className="glass-panel text-mono"
             style={{
-              padding: '8px 14px',
-              borderRadius: '30px',
+              padding: '4px 10px',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.7rem',
-              color: '#00F0FF',
+              gap: '6px',
+              fontSize: '0.65rem',
+              color: 'var(--color-cyan)',
             }}
           >
-            <div className="animate-pulse-glow" style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00F0FF' }} />
-            <span>SONAR ACTIVE</span>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-cyan)', animation: 'pulseGlow 2s infinite' }} />
+            <span>SONAR</span>
           </div>
-
-          {/* Audio Button */}
-          <button
-            onClick={handleAudioToggle}
-            className="glass-panel"
-            title={isAudioActive ? 'Mute Ambience' : 'Enable Audio'}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: isAudioActive ? '#00F0FF' : 'rgba(255,255,255,0.5)',
-              cursor: 'pointer',
-              border: '1px solid ' + (isAudioActive ? 'var(--color-cyan-glow)' : 'var(--hud-border)'),
-              transition: 'all 0.3s ease',
-            }}
-          >
-            {isAudioActive ? <Volume2 size={16} /> : <VolumeX size={16} />}
-          </button>
         </div>
       </header>
     </>
